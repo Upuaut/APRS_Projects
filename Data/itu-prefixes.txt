@@ -7,14 +7,12 @@ Bulgaria		LZ
 Croatia			9A
 Czech Republic		OK
 Denmark		 	OZ
-Estonia			ES
 Finland		 	OH
 France		 	F
 Germany	 	 	DL
+Greece			SV
 Hungary			HA
 Italy	 	 	I
-Latvia			YL
-Lithiuania		LY
 Luxembourg		LX
 Macedonia		Z3
 Moldova			ER
@@ -24,7 +22,6 @@ Norway		 	LA
 Poland		 	SP
 Portugal	 	CT
 Romania			YO
-Russia			R
 Serbia			YT
 Slovakia		OM
 Slovenia		S5
