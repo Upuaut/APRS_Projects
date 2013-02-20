@@ -5,10 +5,21 @@
     <LineStyle>
       <color>ff0000ff</color>
     </LineStyle>
+	  <PolyStyle>
+        <color>7f0000ff</color>
+        <colorMode>normal</colorMode>
+        <fill>1</fill>
+        <outline>1</outline>
+      </PolyStyle>
   </Style>
   <LineString>
+   <Polygon>
+      <tessellate>1</tessellate>
+        <extrude>1</extrude>
 <altitudeMode>clampToGround</altitudeMode>
-    <coordinates>
+     <outerBoundaryIs>
+          <LinearRing>
+	<coordinates>
 2.54903,51.09797 <!-- Sea/Be -->
 2.89871,50.69622
 3.14301,50.79526
@@ -58,6 +69,10 @@
 1.644,50.891
 2.54903,51.09797 <!-- Sea/Be -->
 </coordinates>
+</LinearRing>
+        </outerBoundaryIs>
+
+      </Polygon>
   </LineString>
 </Placemark>
 </kml>
