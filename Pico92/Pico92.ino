@@ -248,18 +248,8 @@ static int pointinpoly(const int32_t *poly, int points, int32_t x, int32_t y)
 
   return(c);
 }
-/*
-******* LIST OF COUNTRIES ******* 
- UK - NO TRANSMISSION
- Netherlands PA/CALLSIGN
- Belgium ON/CALLSIGN
- Luxembourg LX/CALLSIGN
- Switzerland HB/CALLSIGN
- Spain EA/CALLSIGN
- Portugal CT/CALLSIGN
- France F/CALLSIGN
- Germany DL/CALLSIGN
- */
+
+
 int geofence_location(int32_t lat_poly, int32_t lon_poly)
 {
   if(pointinpoly(UKgeofence, 9, lat_poly, lon_poly) == true)
@@ -431,18 +421,18 @@ int geofence_location(int32_t lat_poly, int32_t lon_poly)
   }
   else if(pointinpoly(Russia_geofence, 55, lat_poly, lon_poly) == true)
   {
-    comment[0] = ' ';
-    comment[1] = 'R';
+    comment[0] = 'R';
+    comment[1] = 'A';
   }
   else if(pointinpoly(Turkey_geofence, 21, lat_poly, lon_poly) == true)
   {
-    comment[0] = ' ';
-    comment[1] = 'R';
+    comment[0] = 'T';
+    comment[1] = 'A';
   }
   else if(pointinpoly(Ukraine_geofence, 27, lat_poly, lon_poly) == true)
   {
-    comment[0] = 'E';
-    comment[1] = 'M';
+    comment[0] = 'U';
+    comment[1] = 'T';
   }
   else
   {
