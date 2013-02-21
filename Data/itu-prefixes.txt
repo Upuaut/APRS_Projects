@@ -1,3 +1,6 @@
+Source : http://www.erodocdb.dk/Docs/doc98/official/pdf/TR6101.PDF
+
+
 Albania			ZA
 Austria			OE
 Belarus			EU
@@ -20,16 +23,16 @@ Montenegro		4O
 Netherlands	 	PA
 Norway		 	LA
 Poland		 	SP
-Portugal	 	CT
+Portugal	 	CT (Should be CT7)
 Romania			YO
-Russia			R
-Serbia			YT
+Russia			RA
+Serbia			YU
 Slovakia		OM
 Slovenia		S5
 Spain		 	EA
 Sweden		 	SM
-Switzerland	 	HB
+Switzerland	 	HB (Actually HB9)
 Turkey			TA
-Ukraine			EM
+Ukraine			UT
 United Kingdom   	M
 
