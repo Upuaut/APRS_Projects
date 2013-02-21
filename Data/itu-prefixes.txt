@@ -22,12 +22,14 @@ Norway		 	LA
 Poland		 	SP
 Portugal	 	CT
 Romania			YO
+Russia			R
 Serbia			YT
 Slovakia		OM
 Slovenia		S5
 Spain		 	EA
 Sweden		 	SM
 Switzerland	 	HB
+Turkey			TA
 Ukraine			EM
 United Kingdom   	M
 

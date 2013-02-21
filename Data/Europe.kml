@@ -576,6 +576,7 @@
 7.56826,48.07525
 7.57355,47.58689 <!-- Sw/De -->
 7.57355,47.58689
+8.488,47.583
 8.629,47.644
 8.412,47.666
 8.550,47.780
@@ -1020,7 +1021,7 @@
     </Placemark>
 		<Placemark>
       <name>Poland</name>
-      <styleUrl>#transYellowPoly</styleUrl>
+      <styleUrl>#transGreenPoly</styleUrl>
       <Polygon>
         <extrude>1</extrude>
        <altitudeMode>clampToGround</altitudeMode>
