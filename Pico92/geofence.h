@@ -262,7 +262,7 @@ PROGMEM static const int32_t France_geofence[48 * 2] =
 /* 
  Germany Geofence
  */
-PROGMEM static const int32_t Germany_geofence[76 * 2] =
+PROGMEM static const int32_t Germany_geofence[77 * 2] =
 {
   535540000,68870000,
   532280000,71890000,
@@ -286,6 +286,7 @@ PROGMEM static const int32_t Germany_geofence[76 * 2] =
   480752500,75682600,
   475868900,75735500,
   475868900,75735500,
+  475830000,84880000,
   476440000,86290000,
   476660000,84120000,
   477800000,85500000,
