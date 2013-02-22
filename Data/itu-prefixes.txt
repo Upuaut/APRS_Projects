@@ -6,24 +6,24 @@ Austria			OE
 Belarus			EU
 Belgium			ON
 Bosnia/Herz		E7
-Bulgaria		LZ
+Bulgaria		LZ	Airborne APRS use ok confirmed by LZ1DEV
 Croatia			9A
 Czech Republic		OK
-Denmark		 	OZ
+Denmark		 	OZ	Airborne APRS use ok confirmed by OZ1SKY
 Finland		 	OH
 France		 	F
 Germany	 	 	DL
-Greece			SV
+Greece			SV	Airborne APRS use ok confirmed by SV2AGW
 Hungary			HA
 Italy	 	 	I
 Luxembourg		LX
 Macedonia		Z3
 Moldova			ER
 Montenegro		4O
-Netherlands	 	PA
+Netherlands	 	PA	Airborne APRS use ok confirmed by PA
 Norway		 	LA
-Poland		 	SP
-Portugal	 	CT (Should be CT7)
+Poland		 	SP	Airborne APRS use ok confirmed by SP9UOB
+Portugal	 	CT 							(Should be CT7)
 Romania			YO
 Russia			RA
 Serbia			YU
@@ -31,7 +31,7 @@ Slovakia		OM
 Slovenia		S5
 Spain		 	EA
 Sweden		 	SM
-Switzerland	 	HB (Actually HB9)
+Switzerland	 	HB 							(Actually HB9)
 Turkey			TA
 Ukraine			UT
 United Kingdom   	M
