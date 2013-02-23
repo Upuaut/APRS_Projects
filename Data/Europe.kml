@@ -485,7 +485,7 @@
 	
     <Placemark>
       <name>France</name>
-      <styleUrl>#transYellowPoly</styleUrl>
+      <styleUrl>#transRedPoly</styleUrl>
       <Polygon>
         <extrude>1</extrude>
        <altitudeMode>clampToGround</altitudeMode>

@@ -11,7 +11,7 @@ Croatia			9A
 Czech Republic		OK
 Denmark		 	OZ	Airborne APRS use ok confirmed by OZ1SKY
 Finland		 	OH
-France		 	F
+France		 	F	Airborne APRS not permitted http://www.legifrance.gouv.fr/affichTexte.do;jsessionid=3CC2D292F48EAD55C1DBDF5756769C55.tpdjo13v_2?cidTexte=JORFTEXT000022408790&dateTexte=&oldAction=rechJO&categorieLien=id
 Germany	 	 	DL
 Greece			SV	Airborne APRS use ok confirmed by SV2AGW
 Hungary			HA
