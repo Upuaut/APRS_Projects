@@ -39,7 +39,7 @@
 /* 
  UK Geofence
  */
-PROGMEM static const int32_t UKgeofence[9 * 2] =
+PROGMEM static const int32_t UKgeofence[10 * 2] =
 {
   // Visualisation : https://www.dropbox.com/s/c4avx6i7ppigz35/uk_geofence.kml
   // Source        : http://www.ukho.gov.uk/ProductsandServices/Services/Documents/UK%20Territorial%20Sea%20Limits.pdf

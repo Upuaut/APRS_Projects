@@ -252,7 +252,7 @@ static int pointinpoly(const int32_t *poly, int points, int32_t x, int32_t y)
 
 int geofence_location(int32_t lat_poly, int32_t lon_poly)
 {
-  if(pointinpoly(UKgeofence, 9, lat_poly, lon_poly) == true)
+  if(pointinpoly(UKgeofence, 10, lat_poly, lon_poly) == true)
   {
     comment[0] = ' ';
     comment[1] = ' ';
