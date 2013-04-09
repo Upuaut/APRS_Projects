@@ -332,7 +332,7 @@
     </Placemark>
 		<Placemark>
       <name>Czech Republic</name>
-      <styleUrl>#transYellowPoly</styleUrl>
+      <styleUrl>#transGreenPoly</styleUrl>
       <Polygon>
         <extrude>1</extrude>
        <altitudeMode>clampToGround</altitudeMode>
