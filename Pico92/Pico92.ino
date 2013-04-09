@@ -57,8 +57,9 @@ static const uint8_t PROGMEM _sine_table[] = {
 #define STOPBITS 2       // Either 1 or 2
 #define TXDELAY 0        // Delay between sentence TX's
 #define RTTY_BAUD 50     // Baud rate for use with RFM22B Max = 600
-#define RADIO_FREQUENCY 434.407
+#define RADIO_FREQUENCY 434.450
 #define RADIO_POWER  0x04
+#define RADIO_REBOOT 20  // Reboot Radio every X telemetry lines
 /*
  0x02  5db (3mW)
  0x03  8db (6mW)
@@ -102,7 +103,7 @@ int32_t lat = 514981000, lon = -530000, alt = 0,maxalt = 0,lat_dec = 0, lon_dec 
 uint8_t hour = 0, minute = 0, second = 0, month = 0, day = 0, lock = 0, sats = 0;
 int GPSerror = 0, count = 1, n, navmode = 0, lat_int=0,lon_int=0,errorstatus;
 uint8_t oldhour = 0, oldminute = 0, oldsecond = 0;
-int aprs_status = 0, aprs_attempts = 0, psm_status = 0;
+int aprs_status = 0, aprs_attempts = 0, psm_status = 0, radiostatus=0, countreset=0, aprs_permitted=0;
 int32_t tslf=0;
 uint8_t buf[60]; //GPS receive buffer
 char comment[3]={
@@ -162,9 +163,10 @@ void loop() {
       aprs_tx_status=1;
     }
     if(millis() - startTime > APRS_TX_INTERVAL) {
+      aprs_permitted=0;
       geofence_location(lat,lon);
       aprs_tx_status=0;
-      if(comment[1]!=' ' || (alt<300)) {
+      if( aprs_permitted==1 || (alt<300)) {
         send_APRS();
         aprs_attempts++;
       }
@@ -183,7 +185,7 @@ void loop() {
   if(!lockvariables) {
 
     prepare_data();
-    if(alt>maxalt)
+    if(alt>maxalt && sats >= 4)
     {
       maxalt=alt;
     }
@@ -215,10 +217,15 @@ void loop() {
       wait(125);
       setupGPS();
     }
+   if((count % RADIO_REBOOT == 0) && countreset!=count){
+      digitalWrite(RFM22B_SDN, HIGH);
+      wait(500);
+      setupRadio();
+      wait(500);
+      radiostatus=0;
+      countreset=count;
+    }
   } 
-
-  delay(5000);
-
 }
 
 //************Other Functions*****************
@@ -256,188 +263,224 @@ int geofence_location(int32_t lat_poly, int32_t lon_poly)
   {
     comment[0] = ' ';
     comment[1] = ' ';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Netherlands_geofence, 18, lat_poly, lon_poly) == true)
   {
     comment[0] = 'P';
     comment[1] = 'A';
+    aprs_permitted=1;
   }
 
   else if(pointinpoly(Belgium_geofence, 25, lat_poly, lon_poly) == true)
   {
     comment[0] = 'O';
     comment[1] = 'N';
+    aprs_permitted=0;
   }
 
   else if(pointinpoly(Luxembourg_geofence, 11, lat_poly, lon_poly) == true)
   {
     comment[0] = 'L';
     comment[1] = 'X';
+    aprs_permitted=0;
   }
 
   else if(pointinpoly(Switzerland_geofence, 22, lat_poly, lon_poly) == true)
   {
     comment[0] = 'H';
     comment[1] = 'B';
+    aprs_permitted=1;
   }
 
   else if(pointinpoly(Spain_geofence, 29, lat_poly, lon_poly) == true)
   {
     comment[0] = 'E';
     comment[1] = 'A';
+    aprs_permitted=1;
   }
 
   else if(pointinpoly(Portugal_geofence, 19, lat_poly, lon_poly) == true)
   {
     comment[0] = 'C';
     comment[1] = 'T';
+    aprs_permitted=0;
   }
 
   else if(pointinpoly(France_geofence, 48, lat_poly, lon_poly) == true)
   {
     comment[0] = ' ';
     comment[1] = 'F';
+    aprs_permitted=1;
   }
 
   else if(pointinpoly(Germany_geofence, 77, lat_poly, lon_poly) == true)
   {
     comment[0] = 'D';
     comment[1] = 'L';
+    aprs_permitted=1;
   }
   else if(pointinpoly(Austria_geofence, 51, lat_poly, lon_poly) == true)
   {
     comment[0] = 'O';
     comment[1] = 'E';
+    aprs_permitted=1;
   }
   else if(pointinpoly(Albania_geofence, 18, lat_poly, lon_poly) == true)
   {
     comment[0] = 'Z';
     comment[1] = 'A';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Belarus_geofence, 29, lat_poly, lon_poly) == true)
   {
     comment[0] = 'E';
     comment[1] = 'U';
+    aprs_permitted=1;
   }
   else if(pointinpoly(Bosnia_geofence, 23, lat_poly, lon_poly) == true)
   {
     comment[0] = 'E';
     comment[1] = 'U';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Bulgaria_geofence, 20, lat_poly, lon_poly) == true)
   {
     comment[0] = 'L';
     comment[1] = 'Z';
+    aprs_permitted=1;
   }
   else if(pointinpoly(Croatia_geofence, 33, lat_poly, lon_poly) == true)
   {
     comment[0] = '9';
     comment[1] = 'A';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Czech_geofence, 48, lat_poly, lon_poly) == true)
   {
     comment[0] = 'O';
     comment[1] = 'K';
+    aprs_permitted=1;
   }
   else if(pointinpoly(Denmark_geofence, 10, lat_poly, lon_poly) == true)
   {
     comment[0] = 'O';
     comment[1] = 'Z';
+    aprs_permitted=1;
   }
   else if(pointinpoly(Finland_geofence, 21, lat_poly, lon_poly) == true)
   {
     comment[0] = 'O';
     comment[1] = 'H';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Greece_geofence, 24, lat_poly, lon_poly) == true)
   {
     comment[0] = 'S';
     comment[1] = 'V';
+    aprs_permitted=1;
   }
   else if(pointinpoly(Hungary_geofence, 31, lat_poly, lon_poly) == true)
   {
     comment[0] = 'H';
     comment[1] = 'A';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Italy_geofence, 27, lat_poly, lon_poly) == true)
   {
     comment[0] = ' ';
     comment[1] = 'I';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Macedonia_geofence, 11, lat_poly, lon_poly) == true)
   {
     comment[0] = 'Z';
     comment[1] = '3';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Moldova_geofence, 8, lat_poly, lon_poly) == true)
   {
     comment[0] = 'E';
     comment[1] = 'R';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Kaliningradskaya_geofence, 6, lat_poly, lon_poly) == true)
   {
     comment[0] = ' ';
     comment[1] = 'R';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Montenegro_geofence, 17, lat_poly, lon_poly) == true)
   {
     comment[0] = '4';
     comment[1] = 'O';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Norway_geofence, 20, lat_poly, lon_poly) == true)
   {
     comment[0] = 'L';
     comment[1] = 'A';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Poland_geofence, 47, lat_poly, lon_poly) == true)
   {
     comment[0] = 'S';
     comment[1] = 'P';
+    aprs_permitted=1;
   }
   else if(pointinpoly(Romania_geofence, 15, lat_poly, lon_poly) == true)
   {
     comment[0] = 'Y';
     comment[1] = 'O';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Serbia_geofence, 25, lat_poly, lon_poly) == true)
   {
     comment[0] = 'Y';
     comment[1] = 'T';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Slovakia_geofence, 30, lat_poly, lon_poly) == true)
   {
     comment[0] = 'O';
     comment[1] = 'M';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Slovenia_geofence, 26, lat_poly, lon_poly) == true)
   {
     comment[0] = 'S';
     comment[1] = '5';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Sweden_geofence, 18, lat_poly, lon_poly) == true)
   {
     comment[0] = 'S';
     comment[1] = 'M';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Russia_geofence, 55, lat_poly, lon_poly) == true)
   {
     comment[0] = 'R';
     comment[1] = 'A';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Turkey_geofence, 21, lat_poly, lon_poly) == true)
   {
     comment[0] = 'T';
     comment[1] = 'A';
+    aprs_permitted=0;
   }
   else if(pointinpoly(Ukraine_geofence, 27, lat_poly, lon_poly) == true)
   {
     comment[0] = 'U';
     comment[1] = 'T';
+    aprs_permitted=1;
   }
   else
   {
     comment[0] = ' ';
     comment[1] = '#';
+    aprs_permitted=0;
   }
 }
 void tx_aprs()
@@ -653,7 +696,7 @@ void setupGPS() {
   //Turning off all GPS NMEA strings apart on the uBlox module
   // Taken from Project Swift (rather than the old way of sending ascii text)
   uint8_t setNMEAoff[] = {
-    0xB5, 0x62, 0x06, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0xD0, 0x08, 0x00, 0x00, 0x80, 0x25, 0x00, 0x00, 0x07, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xA0, 0xA9                      };
+    0xB5, 0x62, 0x06, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0xD0, 0x08, 0x00, 0x00, 0x80, 0x25, 0x00, 0x00, 0x07, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xA0, 0xA9                          };
   sendUBX(setNMEAoff, sizeof(setNMEAoff)/sizeof(uint8_t));
   wait(1000);
   setGPS_DynamicModel6();
@@ -674,7 +717,7 @@ void setGPS_DynamicModel3()
     0x03, 0x00, 0x00, 0x00, 0x00, 0x10, 0x27, 0x00, 0x00,
     0x05, 0x00, 0xFA, 0x00, 0xFA, 0x00, 0x64, 0x00, 0x2C,
     0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x13, 0x76                                                                                 };
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x13, 0x76                                                                                     };
   while(!gps_set_sucess)
   {
     sendUBX(setdm3, sizeof(setdm3)/sizeof(uint8_t));
@@ -750,7 +793,7 @@ void gps_check_lock()
   // Construct the request to the GPS
   uint8_t request[8] = {
     0xB5, 0x62, 0x01, 0x06, 0x00, 0x00,
-    0x07, 0x16                                                                                                                                        };
+    0x07, 0x16                                                                                                                                            };
   sendUBX(request, 8);
 
   // Get the message back from the GPS
@@ -825,12 +868,12 @@ uint8_t* ckb)
 }
 void resetGPS() {
   uint8_t set_reset[] = {
-    0xB5, 0x62, 0x06, 0x04, 0x04, 0x00, 0xFF, 0x87, 0x00, 0x00, 0x94, 0xF5                                                                       };
+    0xB5, 0x62, 0x06, 0x04, 0x04, 0x00, 0xFF, 0x87, 0x00, 0x00, 0x94, 0xF5                                                                           };
   sendUBX(set_reset, sizeof(set_reset)/sizeof(uint8_t));
 }
 void setupRadio(){
   digitalWrite(RFM22B_SDN, LOW);
-  delay(1000);
+  delay(500);
   rfm22::initSPI();
   radio1.init();
   radio1.write(0x71, 0x00); // unmodulated carrier
@@ -840,6 +883,7 @@ void setupRadio(){
   radio1.setFrequency(RADIO_FREQUENCY);
   radio1.write(0x6D, RADIO_POWER);
   radio1.write(0x07, 0x08); 
+  radio1.write(0x73,0x03); // Start High
 }
 void initialise_interrupt() 
 {
@@ -867,15 +911,18 @@ ISR(TIMER1_COMPA_vect)
     }
     break;
   case 1: // Initialise transmission
-
-    if(alt>maxalt)
+    if(radiostatus==1)
+    {
+      break;
+      // Just do nothing
+    }
+    if(alt>maxalt && sats >= 4)
     {
       maxalt=alt;
     }
     lockvariables=1;
-    sprintf(txstring, "$$AVA,%i,%02d:%02d:%02d,%s%i.%05ld,%s%i.%05ld,%ld,%d",count, hour, minute, second,lat < 0 ? "-" : "",lat_int,lat_dec,lon < 0 ? "-" : "",lon_int,lon_dec, maxalt,sats);
-    //sprintf(txstring, "%s,%i,%i,%ld,%ld,%i",txstring,errorstatus,inuk,lat,lon,aprs_attempts);
-    sprintf(txstring, "%s,%i,%c%c,%i",txstring,errorstatus,comment[0]==' ' ? '-' : comment[0],comment[1]==' ' ? '-' : comment[1],aprs_attempts);
+    sprintf(txstring, "$$$$$AVA,%i,%02d:%02d:%02d,%s%i.%05ld,%s%i.%05ld,%ld,%d,%i",count, hour, minute, second,lat < 0 ? "-" : "",lat_int,lat_dec,lon < 0 ? "-" : "",lon_int,lon_dec, maxalt,sats,errorstatus);
+    sprintf(txstring, "%s,%c%c,%i",txstring,comment[0]==' ' ? '-' : comment[0],comment[1]==' ' ? '-' : comment[1],aprs_attempts);
     sprintf(txstring, "%s*%04X\n", txstring, gps_CRC16_checksum(txstring));
     maxalt=0;
     lockvariables=0;
@@ -897,6 +944,10 @@ ISR(TIMER1_COMPA_vect)
       txstatus=0; // Should be finished
       txj=0;
       count++;
+      if(count % RADIO_REBOOT == 0) 
+      {
+        radiostatus=1;
+      }
     }
     break;
   case 3:
@@ -962,7 +1013,7 @@ uint16_t gps_CRC16_checksum (char *string)
 uint8_t gps_check_nav(void)
 {
   uint8_t request[8] = {
-    0xB5, 0x62, 0x06, 0x24, 0x00, 0x00, 0x2A, 0x84                                                                                 };
+    0xB5, 0x62, 0x06, 0x24, 0x00, 0x00, 0x2A, 0x84                                                                                     };
   sendUBX(request, 8);
 
   // Get the message back from the GPS
@@ -991,7 +1042,7 @@ void setGPS_DynamicModel6()
     0x03, 0x00, 0x00, 0x00, 0x00, 0x10, 0x27, 0x00, 0x00,
     0x05, 0x00, 0xFA, 0x00, 0xFA, 0x00, 0x64, 0x00, 0x2C,
     0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0xDC                                                                                 };
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0xDC                                                                                     };
   while(!gps_set_sucess)
   {
     sendUBX(setdm6, sizeof(setdm6)/sizeof(uint8_t));
@@ -1015,7 +1066,7 @@ void gps_get_position()
   // Request a NAV-POSLLH message from the GPS
   uint8_t request[8] = {
     0xB5, 0x62, 0x01, 0x02, 0x00, 0x00, 0x03,
-    0x0A                                                                                                                                    };
+    0x0A                                                                                                                                        };
   sendUBX(request, 8);
 
   // Get the message back from the GPS
@@ -1060,7 +1111,7 @@ void gps_get_time()
   // Send a NAV-TIMEUTC message to the receiver
   uint8_t request[8] = {
     0xB5, 0x62, 0x01, 0x21, 0x00, 0x00,
-    0x22, 0x67                                                                                                                                  };
+    0x22, 0x67                                                                                                                                      };
   sendUBX(request, 8);
 
   // Get the message back from the GPS
@@ -1091,13 +1142,13 @@ void gps_get_time()
 void setGPS_PowerSaveMode() {
   // Power Save Mode 
   uint8_t setPSM[] = { 
-    0xB5, 0x62, 0x06, 0x11, 0x02, 0x00, 0x08, 0x01, 0x22, 0x92                                                                                               }; // Setup for Power Save Mode (Default Cyclic 1s)
+    0xB5, 0x62, 0x06, 0x11, 0x02, 0x00, 0x08, 0x01, 0x22, 0x92                                                                                                   }; // Setup for Power Save Mode (Default Cyclic 1s)
   sendUBX(setPSM, sizeof(setPSM)/sizeof(uint8_t));
 }
 void setGps_MaxPerformanceMode() {
   //Set GPS for Max Performance Mode
   uint8_t setMax[] = { 
-    0xB5, 0x62, 0x06, 0x11, 0x02, 0x00, 0x08, 0x00, 0x21, 0x91                                                                                   }; // Setup for Max Power Mode
+    0xB5, 0x62, 0x06, 0x11, 0x02, 0x00, 0x08, 0x00, 0x21, 0x91                                                                                       }; // Setup for Max Power Mode
   sendUBX(setMax, sizeof(setMax)/sizeof(uint8_t));
 }
 void checkDynamicModel() {
@@ -1123,6 +1174,8 @@ void blink(int bdelay) {
   digitalWrite(STATUS_LED, LOW); 
   wait(bdelay);   
 }
+
+
 
 
 
