@@ -59,7 +59,7 @@
     </Placemark>
 	    <Placemark>
       <name>Austria</name>
-      <styleUrl>#transYellowPoly</styleUrl>
+      <styleUrl>#transGreenPoly</styleUrl>
       <Polygon>
         <extrude>1</extrude>
        <altitudeMode>clampToGround</altitudeMode>
@@ -547,7 +547,7 @@
     </Placemark>
  <Placemark>
       <name>Germany</name>
-      <styleUrl>#transYellowPoly</styleUrl>
+      <styleUrl>#transGreenPoly</styleUrl>
       <Polygon>
         <extrude>1</extrude>
        <altitudeMode>clampToGround</altitudeMode>
@@ -1420,7 +1420,7 @@
     </Placemark>
 	<Placemark>
       <name>Switzerland</name>
-      <styleUrl>#transYellowPoly</styleUrl>
+      <styleUrl>#transGreenPoly</styleUrl>
       <Polygon>
         <extrude>1</extrude>
        <altitudeMode>clampToGround</altitudeMode>
