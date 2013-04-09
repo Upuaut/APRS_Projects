@@ -57,7 +57,7 @@ static const uint8_t PROGMEM _sine_table[] = {
 #define STOPBITS 2       // Either 1 or 2
 #define TXDELAY 0        // Delay between sentence TX's
 #define RTTY_BAUD 50     // Baud rate for use with RFM22B Max = 600
-#define RADIO_FREQUENCY 434.450
+#define RADIO_FREQUENCY 434.458
 #define RADIO_POWER  0x04
 #define RADIO_REBOOT 20  // Reboot Radio every X telemetry lines
 /*
@@ -1004,7 +1004,7 @@ uint16_t gps_CRC16_checksum (char *string)
   crc = 0xFFFF;
 
   // Calculate checksum ignoring the first two $s
-  for (i = 2; i < strlen(string); i++)
+  for (i = 5; i < strlen(string); i++)
   {
     c = string[i];
     crc = _crc_xmodem_update (crc, c);
