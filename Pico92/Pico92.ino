@@ -682,13 +682,15 @@ char *ax25_base91enc(char *s, uint8_t n, uint32_t v)
 void send_APRS() {
   ax25_init();
   digitalWrite(HX1_POWER, HIGH);
-  delay(500);
+  wait(200);
   digitalWrite(HX1_ENABLE, HIGH);
-  delay(1000);
+  wait(250);
   tx_aprs();
-  delay(1000);
-  digitalWrite(HX1_POWER, LOW);
+  wait(250);
   digitalWrite(HX1_ENABLE, LOW);
+  wait(100);
+  digitalWrite(HX1_POWER, LOW);
+
 }
 
 
@@ -702,7 +704,7 @@ void setupGPS() {
   setGPS_DynamicModel6();
   wait(1000);
 }
-void wait(unsigned long delaytime) // Arduino Delay doesn't get CPU Speeds below 8Mhz
+void wait(unsigned long delaytime) // Arduino delayMicroseconds doesn't get CPU Speeds below 8Mhz
 {
   unsigned long _delaytime=millis();
   while((_delaytime+delaytime)>=millis()){
@@ -873,7 +875,7 @@ void resetGPS() {
 }
 void setupRadio(){
   digitalWrite(RFM22B_SDN, LOW);
-  delay(500);
+  wait(500);
   rfm22::initSPI();
   radio1.init();
   radio1.write(0x71, 0x00); // unmodulated carrier
