@@ -166,6 +166,9 @@ void loop() {
       aprs_permitted=0;
       geofence_location(lat,lon);
       aprs_tx_status=0;
+      if((lon <= -150000000) && (lon >= 400000000)) {
+         aprs_permitted=1;
+      }
       if( aprs_permitted==1 || (alt<300)) {
         send_APRS();
         aprs_attempts++;
@@ -462,13 +465,13 @@ int geofence_location(int32_t lat_poly, int32_t lon_poly)
   {
     comment[0] = 'R';
     comment[1] = 'A';
-    aprs_permitted=0;
+    aprs_permitted=1;
   }
   else if(pointinpoly(Turkey_geofence, 21, lat_poly, lon_poly) == true)
   {
     comment[0] = 'T';
     comment[1] = 'A';
-    aprs_permitted=0;
+    aprs_permitted=1;
   }
   else if(pointinpoly(Ukraine_geofence, 27, lat_poly, lon_poly) == true)
   {
@@ -682,15 +685,13 @@ char *ax25_base91enc(char *s, uint8_t n, uint32_t v)
 void send_APRS() {
   ax25_init();
   digitalWrite(HX1_POWER, HIGH);
-  wait(200);
+  delay(500);
   digitalWrite(HX1_ENABLE, HIGH);
-  wait(250);
+  delay(1000);
   tx_aprs();
-  wait(250);
+  delay(1000);
   digitalWrite(HX1_ENABLE, LOW);
-  wait(100);
   digitalWrite(HX1_POWER, LOW);
-
 }
 
 
