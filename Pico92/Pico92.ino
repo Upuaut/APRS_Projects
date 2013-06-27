@@ -314,7 +314,7 @@ int geofence_location(int32_t lat_poly, int32_t lon_poly)
   {
     comment[0] = ' ';
     comment[1] = 'F';
-    aprs_permitted=1;
+    aprs_permitted=0;
   }
 
   else if(pointinpoly(Germany_geofence, 77, lat_poly, lon_poly) == true)
@@ -512,7 +512,7 @@ void tx_aprs()
   //0, 0, 0, 0,
   "WIDE1", 1, "WIDE2",1,
   //"WIDE2", 1,
-  "!/%s%sO   /A=%06ld|%s|%s/M0UPU,%d,%i",
+  "!/%s%sO   /A=%06ld|%s|%s/M0UPU,%d,%i,ALSO RTTY/434.45U7N2",
   ax25_base91enc(slat, 4, aprs_lat),
   ax25_base91enc(slng, 4, aprs_lon),
   aprs_alt, stlm, comment, count, errorstatus
