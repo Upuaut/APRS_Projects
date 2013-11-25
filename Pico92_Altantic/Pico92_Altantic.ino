@@ -111,7 +111,7 @@ char comment[3]={
 unsigned long startTime;
 unsigned long sleepstartTime;
 int aprs_tx_status = 0;
-int opmode =0 ;
+int opmode =0;
 
 rfm22 radio1(RFM22B_PIN);
 
