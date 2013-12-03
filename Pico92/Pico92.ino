@@ -167,7 +167,7 @@ void loop() {
       geofence_location(lat,lon);
       aprs_tx_status=0;
       if((lon <= -150000000) && (lon >= 400000000)) {
-         aprs_permitted=1;
+        aprs_permitted=1;
       }
       if( aprs_permitted==1 || (alt<300)) {
         send_APRS();
@@ -220,7 +220,7 @@ void loop() {
       wait(125);
       setupGPS();
     }
-   if((count % RADIO_REBOOT == 0) && countreset!=count){
+    if((count % RADIO_REBOOT == 0) && countreset!=count){
       digitalWrite(RFM22B_SDN, HIGH);
       wait(500);
       setupRadio();
@@ -479,6 +479,12 @@ int geofence_location(int32_t lat_poly, int32_t lon_poly)
     comment[1] = 'T';
     aprs_permitted=1;
   }
+  else if(pointinpoly(Azores,7,lat_poly, lon_poly) == true)
+  {
+    comment[0] = 'C';
+    comment[1] = 'U';
+    aprs_permitted=1;
+  }
   else
   {
     comment[0] = ' ';
@@ -699,7 +705,7 @@ void setupGPS() {
   //Turning off all GPS NMEA strings apart on the uBlox module
   // Taken from Project Swift (rather than the old way of sending ascii text)
   uint8_t setNMEAoff[] = {
-    0xB5, 0x62, 0x06, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0xD0, 0x08, 0x00, 0x00, 0x80, 0x25, 0x00, 0x00, 0x07, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xA0, 0xA9                          };
+    0xB5, 0x62, 0x06, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0xD0, 0x08, 0x00, 0x00, 0x80, 0x25, 0x00, 0x00, 0x07, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xA0, 0xA9                            };
   sendUBX(setNMEAoff, sizeof(setNMEAoff)/sizeof(uint8_t));
   wait(1000);
   setGPS_DynamicModel6();
@@ -720,7 +726,7 @@ void setGPS_DynamicModel3()
     0x03, 0x00, 0x00, 0x00, 0x00, 0x10, 0x27, 0x00, 0x00,
     0x05, 0x00, 0xFA, 0x00, 0xFA, 0x00, 0x64, 0x00, 0x2C,
     0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x13, 0x76                                                                                     };
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x13, 0x76                                                                                       };
   while(!gps_set_sucess)
   {
     sendUBX(setdm3, sizeof(setdm3)/sizeof(uint8_t));
@@ -796,7 +802,7 @@ void gps_check_lock()
   // Construct the request to the GPS
   uint8_t request[8] = {
     0xB5, 0x62, 0x01, 0x06, 0x00, 0x00,
-    0x07, 0x16                                                                                                                                            };
+    0x07, 0x16                                                                                                                                              };
   sendUBX(request, 8);
 
   // Get the message back from the GPS
@@ -871,7 +877,7 @@ uint8_t* ckb)
 }
 void resetGPS() {
   uint8_t set_reset[] = {
-    0xB5, 0x62, 0x06, 0x04, 0x04, 0x00, 0xFF, 0x87, 0x00, 0x00, 0x94, 0xF5                                                                           };
+    0xB5, 0x62, 0x06, 0x04, 0x04, 0x00, 0xFF, 0x87, 0x00, 0x00, 0x94, 0xF5                                                                             };
   sendUBX(set_reset, sizeof(set_reset)/sizeof(uint8_t));
 }
 void setupRadio(){
@@ -924,7 +930,7 @@ ISR(TIMER1_COMPA_vect)
       maxalt=alt;
     }
     lockvariables=1;
-    sprintf(txstring, "$$$$$AVA,%i,%02d:%02d:%02d,%s%i.%05ld,%s%i.%05ld,%ld,%d,%i",count, hour, minute, second,lat < 0 ? "-" : "",lat_int,lat_dec,lon < 0 ? "-" : "",lon_int,lon_dec, maxalt,sats,errorstatus);
+    sprintf(txstring, "$$$$$N2NXZ-2,%i,%02d:%02d:%02d,%s%i.%05ld,%s%i.%05ld,%ld,%d,%i",count, hour, minute, second,lat < 0 ? "-" : "",lat_int,lat_dec,lon < 0 ? "-" : "",lon_int,lon_dec, maxalt,sats,errorstatus);
     sprintf(txstring, "%s,%c%c,%i",txstring,comment[0]==' ' ? '-' : comment[0],comment[1]==' ' ? '-' : comment[1],aprs_attempts);
     sprintf(txstring, "%s*%04X\n", txstring, gps_CRC16_checksum(txstring));
     maxalt=0;
@@ -1016,7 +1022,7 @@ uint16_t gps_CRC16_checksum (char *string)
 uint8_t gps_check_nav(void)
 {
   uint8_t request[8] = {
-    0xB5, 0x62, 0x06, 0x24, 0x00, 0x00, 0x2A, 0x84                                                                                     };
+    0xB5, 0x62, 0x06, 0x24, 0x00, 0x00, 0x2A, 0x84                                                                                       };
   sendUBX(request, 8);
 
   // Get the message back from the GPS
@@ -1045,7 +1051,7 @@ void setGPS_DynamicModel6()
     0x03, 0x00, 0x00, 0x00, 0x00, 0x10, 0x27, 0x00, 0x00,
     0x05, 0x00, 0xFA, 0x00, 0xFA, 0x00, 0x64, 0x00, 0x2C,
     0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0xDC                                                                                     };
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0xDC                                                                                       };
   while(!gps_set_sucess)
   {
     sendUBX(setdm6, sizeof(setdm6)/sizeof(uint8_t));
@@ -1069,7 +1075,7 @@ void gps_get_position()
   // Request a NAV-POSLLH message from the GPS
   uint8_t request[8] = {
     0xB5, 0x62, 0x01, 0x02, 0x00, 0x00, 0x03,
-    0x0A                                                                                                                                        };
+    0x0A                                                                                                                                          };
   sendUBX(request, 8);
 
   // Get the message back from the GPS
@@ -1086,23 +1092,30 @@ void gps_get_position()
   }
 
   if(GPSerror == 0) {
-    // 4 bytes of longitude (1e-7)
-    lon = (int32_t)buf[10] | (int32_t)buf[11] << 8 | 
-      (int32_t)buf[12] << 16 | (int32_t)buf[13] << 24;
-
+    if(sats<4)
+    {
+      lat=0;
+      lon=0;
+      alt=0;
+    }
+    else
+    {
+      lon = (int32_t)buf[10] | (int32_t)buf[11] << 8 | 
+        (int32_t)buf[12] << 16 | (int32_t)buf[13] << 24;
+      lat = (int32_t)buf[14] | (int32_t)buf[15] << 8 | 
+        (int32_t)buf[16] << 16 | (int32_t)buf[17] << 24;
+      alt = (int32_t)buf[22] | (int32_t)buf[23] << 8 | 
+        (int32_t)buf[24] << 16 | (int32_t)buf[25] << 24;
+    }
+    // 4 bytes of latitude/longitude (1e-7)
     lon_int=abs(lon/10000000);
-    lon_dec=(labs(lon) % 10000000)/100;
-    // 4 bytes of latitude (1e-7)
-    lat = (int32_t)buf[14] | (int32_t)buf[15] << 8 | 
-      (int32_t)buf[16] << 16 | (int32_t)buf[17] << 24;
-
+    lon_dec=(labs(lon) % 10000000)/10;
     lat_int=abs(lat/10000000);
-    lat_dec=(labs(lat) % 10000000)/100;
+    lat_dec=(labs(lat) % 10000000)/10;
 
 
     // 4 bytes of altitude above MSL (mm)
-    alt = (int32_t)buf[22] | (int32_t)buf[23] << 8 | 
-      (int32_t)buf[24] << 16 | (int32_t)buf[25] << 24;
+
     alt /= 1000; // Correct to meters
   }
 
@@ -1114,7 +1127,7 @@ void gps_get_time()
   // Send a NAV-TIMEUTC message to the receiver
   uint8_t request[8] = {
     0xB5, 0x62, 0x01, 0x21, 0x00, 0x00,
-    0x22, 0x67                                                                                                                                      };
+    0x22, 0x67                                                                                                                                        };
   sendUBX(request, 8);
 
   // Get the message back from the GPS
@@ -1131,7 +1144,7 @@ void gps_get_time()
   }
 
   if(GPSerror == 0) {
-    if(hour > 23 || minute > 59 || second > 59)
+    if(buf[22] > 23 || buf[23] > 59 || buf[24] > 59)
     {
       GPSerror = 34;
     }
@@ -1145,13 +1158,13 @@ void gps_get_time()
 void setGPS_PowerSaveMode() {
   // Power Save Mode 
   uint8_t setPSM[] = { 
-    0xB5, 0x62, 0x06, 0x11, 0x02, 0x00, 0x08, 0x01, 0x22, 0x92                                                                                                   }; // Setup for Power Save Mode (Default Cyclic 1s)
+    0xB5, 0x62, 0x06, 0x11, 0x02, 0x00, 0x08, 0x01, 0x22, 0x92                                                                                                     }; // Setup for Power Save Mode (Default Cyclic 1s)
   sendUBX(setPSM, sizeof(setPSM)/sizeof(uint8_t));
 }
 void setGps_MaxPerformanceMode() {
   //Set GPS for Max Performance Mode
   uint8_t setMax[] = { 
-    0xB5, 0x62, 0x06, 0x11, 0x02, 0x00, 0x08, 0x00, 0x21, 0x91                                                                                       }; // Setup for Max Power Mode
+    0xB5, 0x62, 0x06, 0x11, 0x02, 0x00, 0x08, 0x00, 0x21, 0x91                                                                                         }; // Setup for Max Power Mode
   sendUBX(setMax, sizeof(setMax)/sizeof(uint8_t));
 }
 void checkDynamicModel() {
@@ -1177,6 +1190,7 @@ void blink(int bdelay) {
   digitalWrite(STATUS_LED, LOW); 
   wait(bdelay);   
 }
+
 
 
 

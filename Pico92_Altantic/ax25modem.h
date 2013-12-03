@@ -21,7 +21,7 @@
 #define __AX25MODEM_H
 
 //#define APRS_ENABLED
-#define APRS_CALLSIGN "M0UPU"
+#define APRS_CALLSIGN "N2NXZ"
 #define APRS_SSID     (11)
 
 extern void ax25_init(void);

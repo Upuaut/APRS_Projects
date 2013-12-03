@@ -40,6 +40,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <util/delay.h>
 #include <SPI.h>
 #include <RFM22.h>
 #include <avr/pgmspace.h>
@@ -57,7 +58,7 @@ static const uint8_t PROGMEM _sine_table[] = {
 #define STOPBITS 2       // Either 1 or 2
 #define TXDELAY 0        // Delay between sentence TX's
 #define RTTY_BAUD 50     // Baud rate for use with RFM22B Max = 600
-#define RADIO_FREQUENCY 434.458
+#define RADIO_FREQUENCY 434.537
 #define RADIO_POWER  0x04
 #define RADIO_REBOOT 20  // Reboot Radio every X telemetry lines
 /*
@@ -72,7 +73,7 @@ static const uint8_t PROGMEM _sine_table[] = {
 
 #define RFM22B_PIN 10
 #define RFM22B_SDN A5
-#define STATUS_LED 7            // PAVA R7 Boards have an LED on PIN4
+#define STATUS_LED 7
 #define GPS_ENABLE 5
 #define HX1_POWER  6
 #define HX1_ENABLE 4
@@ -121,11 +122,12 @@ void setup() {
   pinMode(HX1_ENABLE, OUTPUT);
   pinMode(GPS_ENABLE, OUTPUT); 
   pinMode(RFM22B_SDN, OUTPUT);
-  digitalWrite(RFM22B_SDN,LOW);
+  digitalWrite(RFM22B_SDN,HIGH);
   digitalWrite(HX1_POWER, LOW);
   digitalWrite(HX1_ENABLE, LOW);
   digitalWrite(GPS_ENABLE, LOW);
   wait(500);
+  digitalWrite(RFM22B_SDN,LOW);
   setupRadio();
   Serial.begin(9600);
   wait(150);
@@ -238,7 +240,7 @@ void loop() {
       }
       if((count % RADIO_REBOOT == 0) && countreset!=count){
         digitalWrite(RFM22B_SDN, HIGH);
-        wait(500);
+        wait(1000);
         setupRadio();
         wait(500);
         radiostatus=0;
@@ -246,21 +248,32 @@ void loop() {
       }
       break;
     case 2:     //sleep mode
-      cli();
-      digitalWrite(RFM22B_SDN,LOW);
-      digitalWrite(GPS_ENABLE, LOW); 
-      sleepstartTime=millis();
-      while(millis() - startTime > 1200000) // 60000 = 1 min 1800000 = 3 hours Varible timer as we get close to Azores / European main land ? 
-      {
-        // Do nothing its lonely up here. 
-        // Daisy Daisy ....
-        // One day I'll work out how to do Arduino sleep code but enough has changed already and I don't have time to test this anyway.
-        // I wonder if I can see the Azores yet ?
-      }
-      digitalWrite(RFM22B_SDN,HIGH);
+      // cli();
+      // digitalWrite(RFM22B_SDN,HIGH);
       digitalWrite(GPS_ENABLE, HIGH); 
-      sei();
-      opmode=0;
+      radio1.write(0x6D, 0x01);
+
+      for (int delayblah = 0; delayblah < 1800; delayblah++) {
+        _delay_ms(1000);
+      }
+      /*    sleepstartTime=millis();
+       while(millis() - sleepstartTime < 120000) // 60000 = 1 min 1800000 = 3 hours Varible timer as we get close to Azores / European main land ? 
+       {
+       // Do nothing its lonely up here. 
+       // Daisy Daisy ....
+       // One day I'll work out how to do Arduino sleep code but enough has changed already and I don't have time to test this anyway.
+       // I wonder if I can see the Azores yet ?
+       }*/
+      //      pinMode(RFM22B_SDN, OUTPUT);    // RFM22B SDN is on ARDUINO A3
+      //     digitalWrite(RFM22B_SDN,LOW);
+      digitalWrite(GPS_ENABLE, LOW); 
+      radio1.write(0x6D, 0x04);
+      //   sei();
+      opmode=1;
+      sats=0;
+      lon=0;
+      lat=0;
+      alt=0;
       break;
     } 
   }
@@ -298,7 +311,8 @@ static int pointinpoly(const int32_t *poly, int points, int32_t x, int32_t y)
 
 int geofence_location(int32_t lat_poly, int32_t lon_poly)
 {
-  if(pointinpoly(Atlantic,11, lat_poly, lon_poly) == true)
+  //  if(pointinpoly(Atlantic,11, lat_poly, lon_poly) == true)
+  if(pointinpoly(test,5,lat_poly,lon_poly) == true)
   {
     if(pointinpoly(Azores,7,lat_poly, lon_poly) == true)
     {
@@ -315,7 +329,7 @@ int geofence_location(int32_t lat_poly, int32_t lon_poly)
       opmode=2;
     }
   }
-  if(pointinpoly(UKgeofence, 10, lat_poly, lon_poly) == true)
+  else if(pointinpoly(UKgeofence, 10, lat_poly, lon_poly) == true)
   {
     comment[0] = ' ';
     comment[1] = ' ';
@@ -788,7 +802,7 @@ void setupGPS() {
   //Turning off all GPS NMEA strings apart on the uBlox module
   // Taken from Project Swift (rather than the old way of sending ascii text)
   uint8_t setNMEAoff[] = {
-    0xB5, 0x62, 0x06, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0xD0, 0x08, 0x00, 0x00, 0x80, 0x25, 0x00, 0x00, 0x07, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xA0, 0xA9                                            };
+    0xB5, 0x62, 0x06, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0xD0, 0x08, 0x00, 0x00, 0x80, 0x25, 0x00, 0x00, 0x07, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xA0, 0xA9                                              };
   sendUBX(setNMEAoff, sizeof(setNMEAoff)/sizeof(uint8_t));
   wait(1000);
   setGPS_DynamicModel6();
@@ -809,7 +823,7 @@ void setGPS_DynamicModel3()
     0x03, 0x00, 0x00, 0x00, 0x00, 0x10, 0x27, 0x00, 0x00,
     0x05, 0x00, 0xFA, 0x00, 0xFA, 0x00, 0x64, 0x00, 0x2C,
     0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x13, 0x76                                                                                                       };
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x13, 0x76                                                                                                         };
   while(!gps_set_sucess)
   {
     sendUBX(setdm3, sizeof(setdm3)/sizeof(uint8_t));
@@ -830,7 +844,7 @@ boolean getUBX_ACK(uint8_t *MSG) {
   uint8_t b;
   uint8_t ackByteID = 0;
   uint8_t ackPacket[10];
-  unsigned long startTime = millis();
+  unsigned long GPSstartTime = millis();
 
   // Construct the expected ACK packet    
   ackPacket[0] = 0xB5;	// header
@@ -859,7 +873,7 @@ boolean getUBX_ACK(uint8_t *MSG) {
     }
 
     // Timeout if no valid response in 3 seconds
-    if (millis() - startTime > 3000) { 
+    if (millis() - GPSstartTime > 3000) { 
       return false;
     }
 
@@ -885,7 +899,7 @@ void gps_check_lock()
   // Construct the request to the GPS
   uint8_t request[8] = {
     0xB5, 0x62, 0x01, 0x06, 0x00, 0x00,
-    0x07, 0x16                                                                                                                                                              };
+    0x07, 0x16                                                                                                                                                                };
   sendUBX(request, 8);
 
   // Get the message back from the GPS
@@ -926,9 +940,9 @@ void gps_get_data()
     buf[i] = 0; // clearing buffer  
   }  
   int i = 0;
-  unsigned long startTime = millis();
+  unsigned long GPSstartTime = millis();
 
-  while ((i<60) && ((millis() - startTime) < 1000) ) { 
+  while ((i<60) && ((millis() - GPSstartTime) < 1000) ) { 
     if (Serial.available()) {
       buf[i] = Serial.read();
       i++;
@@ -960,12 +974,13 @@ uint8_t* ckb)
 }
 void resetGPS() {
   uint8_t set_reset[] = {
-    0xB5, 0x62, 0x06, 0x04, 0x04, 0x00, 0xFF, 0x87, 0x00, 0x00, 0x94, 0xF5                                                                                             };
+    0xB5, 0x62, 0x06, 0x04, 0x04, 0x00, 0xFF, 0x87, 0x00, 0x00, 0x94, 0xF5                                                                                               };
   sendUBX(set_reset, sizeof(set_reset)/sizeof(uint8_t));
 }
 void setupRadio(){
+  pinMode(RFM22B_SDN, OUTPUT);    // RFM22B SDN is on ARDUINO A3
   digitalWrite(RFM22B_SDN, LOW);
-  wait(500);
+  wait(1000);
   rfm22::initSPI();
   radio1.init();
   radio1.write(0x71, 0x00); // unmodulated carrier
@@ -1013,7 +1028,7 @@ ISR(TIMER1_COMPA_vect)
       maxalt=alt;
     }
     lockvariables=1;
-    sprintf(txstring, "$$$$$AVA,%i,%02d:%02d:%02d,%s%i.%05ld,%s%i.%05ld,%ld,%d,%i",count, hour, minute, second,lat < 0 ? "-" : "",lat_int,lat_dec,lon < 0 ? "-" : "",lon_int,lon_dec, maxalt,sats,errorstatus);
+    sprintf(txstring, "$$$$$N2NXZ-2,%i,%02d:%02d:%02d,%s%i.%05ld,%s%i.%05ld,%ld,%d,%i",count, hour, minute, second,lat < 0 ? "-" : "",lat_int,lat_dec,lon < 0 ? "-" : "",lon_int,lon_dec, maxalt,sats,errorstatus);
     sprintf(txstring, "%s,%c%c,%i",txstring,comment[0]==' ' ? '-' : comment[0],comment[1]==' ' ? '-' : comment[1],aprs_attempts);
     sprintf(txstring, "%s*%04X\n", txstring, gps_CRC16_checksum(txstring));
     maxalt=0;
@@ -1105,7 +1120,7 @@ uint16_t gps_CRC16_checksum (char *string)
 uint8_t gps_check_nav(void)
 {
   uint8_t request[8] = {
-    0xB5, 0x62, 0x06, 0x24, 0x00, 0x00, 0x2A, 0x84                                                                                                       };
+    0xB5, 0x62, 0x06, 0x24, 0x00, 0x00, 0x2A, 0x84                                                                                                         };
   sendUBX(request, 8);
 
   // Get the message back from the GPS
@@ -1134,7 +1149,7 @@ void setGPS_DynamicModel6()
     0x03, 0x00, 0x00, 0x00, 0x00, 0x10, 0x27, 0x00, 0x00,
     0x05, 0x00, 0xFA, 0x00, 0xFA, 0x00, 0x64, 0x00, 0x2C,
     0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0xDC                                                                                                       };
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0xDC                                                                                                         };
   while(!gps_set_sucess)
   {
     sendUBX(setdm6, sizeof(setdm6)/sizeof(uint8_t));
@@ -1158,7 +1173,7 @@ void gps_get_position()
   // Request a NAV-POSLLH message from the GPS
   uint8_t request[8] = {
     0xB5, 0x62, 0x01, 0x02, 0x00, 0x00, 0x03,
-    0x0A                                                                                                                                                          };
+    0x0A                                                                                                                                                            };
   sendUBX(request, 8);
 
   // Get the message back from the GPS
@@ -1210,7 +1225,7 @@ void gps_get_time()
   // Send a NAV-TIMEUTC message to the receiver
   uint8_t request[8] = {
     0xB5, 0x62, 0x01, 0x21, 0x00, 0x00,
-    0x22, 0x67                                                                                                                                                        };
+    0x22, 0x67                                                                                                                                                          };
   sendUBX(request, 8);
 
   // Get the message back from the GPS
@@ -1227,7 +1242,7 @@ void gps_get_time()
   }
 
   if(GPSerror == 0) {
-    if(hour >  buf[22] || minute >  buf[23] || second >  buf[24])
+    if(buf[22] > 23 || buf[23] > 59 || buf[24] > 59)
     {
       GPSerror = 34;
     }
@@ -1241,13 +1256,13 @@ void gps_get_time()
 void setGPS_PowerSaveMode() {
   // Power Save Mode 
   uint8_t setPSM[] = { 
-    0xB5, 0x62, 0x06, 0x11, 0x02, 0x00, 0x08, 0x01, 0x22, 0x92                                                                                                                     }; // Setup for Power Save Mode (Default Cyclic 1s)
+    0xB5, 0x62, 0x06, 0x11, 0x02, 0x00, 0x08, 0x01, 0x22, 0x92                                                                                                                       }; // Setup for Power Save Mode (Default Cyclic 1s)
   sendUBX(setPSM, sizeof(setPSM)/sizeof(uint8_t));
 }
 void setGps_MaxPerformanceMode() {
   //Set GPS for Max Performance Mode
   uint8_t setMax[] = { 
-    0xB5, 0x62, 0x06, 0x11, 0x02, 0x00, 0x08, 0x00, 0x21, 0x91                                                                                                         }; // Setup for Max Power Mode
+    0xB5, 0x62, 0x06, 0x11, 0x02, 0x00, 0x08, 0x00, 0x21, 0x91                                                                                                           }; // Setup for Max Power Mode
   sendUBX(setMax, sizeof(setMax)/sizeof(uint8_t));
 }
 void checkDynamicModel() {
@@ -1273,6 +1288,7 @@ void blink(int bdelay) {
   digitalWrite(STATUS_LED, LOW); 
   wait(bdelay);   
 }
+
 
 
 
